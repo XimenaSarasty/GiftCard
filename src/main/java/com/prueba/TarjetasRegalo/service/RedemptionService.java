@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Optional;
 
 @Service
 public class RedemptionService {
@@ -22,27 +21,32 @@ public class RedemptionService {
     private EmailService emailService;
 
     public void redeemGiftCard(String cardCode, String recipientEmail) {
-        Optional<GiftCard> giftCardOptional = giftCardService.findByCode(cardCode);
-        if (giftCardOptional.isPresent()) {
-            GiftCard giftCard = giftCardOptional.get();
-            if ("Active".equalsIgnoreCase(giftCard.getState())) {
-                // Lógica para marcar la tarjeta como redimida (actualizar el estado)
-                giftCard.setState("Redeemed");
-                giftCardService.updateGiftCard(giftCard.getIdCard(), giftCard);
+        // Obtener la tarjeta por código
+        GiftCard giftCard = giftCardService.findByCode(cardCode);
 
-                // Crear el registro de redención
-                Redemption redemption = new Redemption();
-                redemption.setGiftCard(giftCard);
-                redemption.setDataRedemption(new Date());
-                redemptionRepository.save(redemption);
-
-                // Enviar la notificación
-                emailService.sendRedemptionNotification(recipientEmail, giftCard.getCode());
-            } else {
-                System.out.println("La tarjeta con código " + cardCode + " no está activa o ya ha sido redimida.");
-            }
-        } else {
+        // Verificar si la tarjeta existe
+        if (giftCard == null) {
             System.out.println("No se encontró la tarjeta con código " + cardCode + ".");
+            return;
         }
+
+        // Verificar si la tarjeta está activa
+        if (!"Active".equalsIgnoreCase(giftCard.getState())) {
+            System.out.println("La tarjeta con código " + cardCode + " no está activa o ya ha sido redimida.");
+            return;
+        }
+
+        // Marcar la tarjeta como redimida
+        giftCard.setState("Redeemed");
+        giftCardService.updateGiftCard(giftCard.getIdCard(), giftCard);
+
+        // Crear y guardar el registro de redención
+        Redemption redemption = new Redemption();
+        redemption.setGiftCard(giftCard);
+        redemption.setDataRedemption(new Date());
+        redemptionRepository.save(redemption);
+
+        // Enviar notificación de redención
+        emailService.sendRedemptionNotification(recipientEmail, giftCard.getCode());
     }
 }

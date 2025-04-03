@@ -44,13 +44,15 @@ public class GiftCardServiceImpl implements GiftCardService {
     }
 
     @Override
-    public Optional<GiftCard> findById(Long id) {
-        return giftCardRepository.findById(id);
+    public GiftCard findById(Long id) {
+        return giftCardRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("GiftCard con ID " + id + " no encontrada"));
     }
 
     @Override
-    public Optional<GiftCard> findByCode(String cardCode) {
-        return giftCardRepository.findByCode(cardCode);
+    public GiftCard findByCode(String cardCode) {
+        return giftCardRepository.findByCode(cardCode)
+                .orElseThrow(() -> new RuntimeException("GiftCard con código " + cardCode + " no encontrada"));
     }
 
     @Override
@@ -60,7 +62,7 @@ public class GiftCardServiceImpl implements GiftCardService {
             giftCard.setCreationDateCard(new Date());
         }
         GiftCard savedCard = giftCardRepository.save(giftCard);
-        String recipientEmail = "laura.limas0207@gmail.com";
+        String recipientEmail = "exampleRecipient@gmail.com";
         emailService.sendCreationNotification(recipientEmail, savedCard.getCode(), savedCard.getAmount());
         return savedCard;
     }

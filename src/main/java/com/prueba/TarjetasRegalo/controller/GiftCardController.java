@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/api/giftcards")
 public class GiftCardController {
 
     @Autowired
@@ -22,9 +23,7 @@ public class GiftCardController {
     }
 
     @GetMapping("/findById/{id}")
-    public Optional<GiftCard> findById(@PathVariable Long id) {
-        return giftCardService.findById(id);
-    }
+    public GiftCard findById(@PathVariable Long id) {return giftCardService.findById(id);}
 
     @PostMapping("/saveGiftCard")
     public GiftCard saveGiftCard(@RequestBody GiftCard giftCard) {

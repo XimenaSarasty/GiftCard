@@ -7,10 +7,10 @@ import java.util.Optional;
 
 public interface GiftCardService {
     List<GiftCard> findAllGiftCards();
-    Optional<GiftCard> findById(Long id);
+    GiftCard findById(Long id);
+    GiftCard findByCode(String cardCode);
     GiftCard saveGiftCard(GiftCard giftCard);
     GiftCard updateGiftCard(Long idCard, GiftCard giftCard);
-    Optional<GiftCard> findByCode(String cardCode);
     void deleteGiftCard(Long id);
     GiftCard updateState(String cardCode, String newState);
 }
