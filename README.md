@@ -1,7 +1,3 @@
-Aquí tienes la documentación actualizada con las nuevas funcionalidades para **editar, eliminar, buscar por ID y buscar por `codeCard`** en la API de gestión de tarjetas regalo.  
-
----
-
 # **Tarjetas Regalo**  
 
 Aplicación monolítica para la gestión de tarjetas regalo.
