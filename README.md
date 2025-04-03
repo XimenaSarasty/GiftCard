@@ -1,185 +1,39 @@
-# Tarjetas Regalo
+# **Tarjetas Regalo**  
 
 Aplicación monolítica para la gestión de tarjetas regalo.
 
-## Descripción
+## **3. Funcionalidades principales**  
 
-Este proyecto implementa un sistema de gestión de tarjetas regalo, permitiendo la creación, consulta, actualización y uso de tarjetas regalo digitales.
+### **Gestión de tarjetas regalo**  
 
-## Requisitos previos
+El sistema permite la gestión completa del ciclo de vida de las tarjetas regalo:  
 
-- Java 11
-- Maven 3.6+
-- Docker (opcional, para contenedorización)
+- **Creación**: Generación de nuevas tarjetas regalo  
+- **Consulta**: Visualización de detalles y saldo de tarjetas  
+- **Recarga**: Adición de saldo en la edición a tarjetas existentes  
+- **Redención**: Uso del saldo disponible en las tarjetas  
+- **Edición**: Modificación de los datos de una tarjeta existente  
+- **Eliminación**: Eliminación de tarjetas regalo  
+- **Búsqueda**: Obtención de tarjetas por ID o código de tarjeta (`codeCard`)  
 
-## 1. Ejecución
+---
 
-### Iniciar la aplicación
+## **4. Endpoints de la API**  
 
-Para iniciar la aplicación, puedes usar el plugin de Spring Boot de Maven:
+### **Autenticación y seguridad**  
 
-```shellscript
-mvn spring-boot:run
-```
-
-Alternativamente, puedes ejecutar el JAR generado:
-
-```shellscript
-java -jar target/TarjetasRegalo-0.0.1-SNAPSHOT.jar
-```
-
-### Configuración de la base de datos
-
-#### Opción 1: Base de datos H2 (por defecto)
-
-La aplicación está configurada para usar H2 como base de datos en memoria por defecto, ideal para desarrollo y pruebas.
-
-La consola de H2 estará disponible en: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
-
-Datos de conexión por defecto:
-
-- JDBC URL: `jdbc:h2:mem:tarjetasdb`
-- Usuario: `sa`
-- Contraseña: (dejar en blanco)
-
-
-Para configurar H2, añade estas propiedades en `application.properties`:
-
-```plaintext
-spring.datasource.url=jdbc:h2:mem:tarjetasdb
-spring.datasource.driverClassName=org.h2.Driver
-spring.datasource.username=sa
-spring.datasource.password=
-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
-spring.h2.console.enabled=true
-spring.jpa.hibernate.ddl-auto=update
-```
-
-#### Opción 2: Base de datos PostgreSQL con Docker
-
-Para entornos de producción o pruebas más realistas, puedes usar Docker para ejecutar una base de datos PostgreSQL:
-
-1. Inicia un contenedor PostgreSQL:
-
-
-```shellscript
-docker run --name postgres-tarjetas -e POSTGRES_PASSWORD=password -e POSTGRES_DB=tarjetasdb -p 5432:5432 -d postgres
-```
-
-2. Configura la aplicación para usar PostgreSQL modificando `application.properties`:
-
-
-```plaintext
-spring.datasource.url=jdbc:postgresql://localhost:5432/tarjetasdb
-spring.datasource.username=postgres
-spring.datasource.password=password
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.hibernate.ddl-auto=update
-```
-
-## 3. Funcionalidades principales
-
-### Gestión de tarjetas regalo
-
-El sistema permite la gestión completa del ciclo de vida de las tarjetas regalo:
-
-- **Creación**: Generación de nuevas tarjetas regalo
-- **Consulta**: Visualización de detalles y saldo de tarjetas
-- **Recarga**: Adición de saldo en la edición a tarjetas existentes
-- **Redención**: Uso del saldo disponible en las tarjetas
-
-
-### Sistema de notificaciones por email
-
-La aplicación cuenta con un sistema de notificaciones por email que se activa en los siguientes eventos:
-
-1. **Creación de tarjeta**: Cuando se crea una nueva tarjeta regalo, se envía un email al destinatario con:
-
-- Código único de la tarjeta
-- Monto inicial
-- Mensaje personalizado del remitente
-
-
-2. **Redención de tarjeta**: Cuando se redime (usa) una tarjeta, se envían notificaciones a:
-
-- **Propietario original**: Notificación de que su regalo ha sido utilizado
-
-### Configuración del servicio de email
-
-Para habilitar el sistema de notificaciones, configura las siguientes propiedades en `application.properties`:
-
-```plaintext
-# Configuración básica de email
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=tu-email@gmail.com
-spring.mail.password=tu-contraseña-o-token-de-aplicación
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
+La API utiliza JWT (JSON Web Tokens) para la autenticación. Para acceder a los endpoints siguientes, se debe incluir el token JWT en el encabezado:  
 
 ```
-
-### Procesamiento automático de tarjetas expiradas (Bonus)
-
-El sistema incluye una funcionalidad de procesamiento automático de tarjetas expiradas mediante una tarea programada:
-
-- **Ejecución diaria**: La tarea se ejecuta automáticamente todos los días a las 3:00 AM
-- **Verificación de expiración**: Comprueba todas las tarjetas con fecha de expiración anterior a la fecha actual
-- **Marcado automático**: Las tarjetas expiradas se marcan con estado "Expired"
-
-
-Para configurar esta funcionalidad, asegúrate de tener estas propiedades en `application.properties`:
-
-```plaintext
-# Configuración de tareas programadas
-spring.task.scheduling.pool.size=5
-tarjetas.expiracion.cron=0 0 3 * * ?  # Ejecutar todos los días a las 3:00 AM
+Authorization: Bearer {token}
 ```
 
-## 4. Endpoints de la API
+### **Gestión de tarjetas regalo**  
 
-### Autenticación y seguridad
-
-La API utiliza JWT (JSON Web Tokens) para la autenticación:
-
-- **POST /api/auth/authenticate: Iniciar sesión y obtener token JWT
-
-```json
-{
-  "username": "usuario@ejemplo.com",
-  "password": "contraseña"
-}
-```
-
-Respuesta:
-
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expiresIn": 3600,
-  "tokenType": "Bearer"
-}
-```
-
-
-- **POST /api/auth/register**: Registrar nuevo usuario
-
-```json
-{
-  "username": "usuario@ejemplo.com",
-  "password": "contraseña",
-}
-```
-
-
-
-
-### Gestión de tarjetas regalo
-
-Para todos los endpoints siguientes, se requiere incluir el token JWT en el header:
-`Authorization: Bearer {token}`
-
-- **POST /api/giftcards/saveGiftCard: Crear nueva tarjeta regalo
+#### **1. Crear una nueva tarjeta regalo**  
+- **Endpoint:** `POST /api/giftcards/saveGiftCard`  
+- **Descripción:** Permite crear una nueva tarjeta regalo.  
+- **Cuerpo de la solicitud:**  
 
 ```json
 {
@@ -188,71 +42,186 @@ Para todos los endpoints siguientes, se requiere incluir el token JWT en el head
     "expirationDateCard": "2025-04-30T04:17:48.103+00:00",
     "state": "Active"
 }
-
 ```
 
-- **GET /api/giftcards/findAllGiftCards: Obtener todas las tarjetas del usuario autenticado
+#### **2. Obtener todas las tarjetas regalo**  
+- **Endpoint:** `GET /api/giftcards/findAllGiftCards`  
+- **Descripción:** Devuelve todas las tarjetas regalo del usuario autenticado.  
 
-
+- **Ejemplo de respuesta:**  
 ```json
 [
     {
-    "code":12345,
+        "id": 1,
+        "codeCard": "12345",
         "amount": 2000,
         "creationDateCard": "2025-04-02T04:17:48.103+00:00",
         "expirationDateCard": "2025-04-30T04:17:48.103+00:00",
         "state": "Active"
     },
     {
-    "code":12345,
-        "amount": 2000,
+        "id": 2,
+        "codeCard": "67890",
+        "amount": 3000,
         "creationDateCard": "2025-04-02T04:17:48.103+00:00",
-        "expirationDateCard": "2025-04-30T04:17:48.103+00:00",
+        "expirationDateCard": "2025-05-30T04:17:48.103+00:00",
         "state": "Active"
     }
 ]
-
 ```
 
-### Administración (solo para usuarios con rol ADMIN)
+#### **3. Buscar una tarjeta por ID**  
+- **Endpoint:** `GET /api/giftcards/findById/{id}`  
+- **Descripción:** Devuelve los detalles de una tarjeta regalo específica según su ID.  
+- **Ejemplo de respuesta:**  
 
-- **POST /redemptions/redeem/{cardCode}: Redimir o utilizar una tarjeta
-    (donde {cardCode} es el código de la tarjeta
-    
-    Parámetros de Consulta:
-    recipientEmail (correo electrónico del destinatario)
+```json
+{
+    "id": 1,
+    "codeCard": "12345",
+    "amount": 2000,
+    "creationDateCard": "2025-04-02T04:17:48.103+00:00",
+    "expirationDateCard": "2025-04-30T04:17:48.103+00:00",
+    "state": "Active"
+}
+```
 
+#### **4. Buscar una tarjeta por `codeCard`**  
+- **Endpoint:** `GET /api/giftcards/findByCode/{codeCard}`  
+- **Descripción:** Devuelve la tarjeta regalo con el código de tarjeta especificado.  
+- **Ejemplo de respuesta:**  
 
-## 5. Modelo de datos
+```json
+{
+    "id": 2,
+    "codeCard": "67890",
+    "amount": 3000,
+    "creationDateCard": "2025-04-02T04:17:48.103+00:00",
+    "expirationDateCard": "2025-05-30T04:17:48.103+00:00",
+    "state": "Active"
+}
+```
+
+#### **5. Editar una tarjeta regalo**  
+- **Endpoint:** `PUT /api/giftcards/update/{id}`  
+- **Descripción:** Modifica los datos de una tarjeta regalo existente.  
+- **Cuerpo de la solicitud:**  
+
+```json
+{
+    "amount": 5000,
+    "expirationDateCard": "2025-06-30T04:17:48.103+00:00",
+    "state": "Active"
+}
+```
+
+- **Ejemplo de respuesta:**  
+```json
+{
+    "message": "Tarjeta regalo actualizada correctamente",
+    "updatedGiftCard": {
+        "id": 2,
+        "codeCard": "67890",
+        "amount": 5000,
+        "creationDateCard": "2025-04-02T04:17:48.103+00:00",
+        "expirationDateCard": "2025-06-30T04:17:48.103+00:00",
+        "state": "Active"
+    }
+}
+```
+
+#### **6. Eliminar una tarjeta regalo**  
+- **Endpoint:** `DELETE /api/giftcards/delete/{id}`  
+- **Descripción:** Elimina una tarjeta regalo por su ID.  
+- **Ejemplo de respuesta:**  
+
+```json
+{
+    "message": "Tarjeta regalo eliminada correctamente"
+}
+```
+
+---
+
+## **5. Modelo de datos**  
 
 El sistema utiliza las siguientes entidades principales:
 
-- **User**: Almacena información de usuarios registrados
-- **GiftCard**: Representa una tarjeta regalo con su saldo, estado y fechas
-- **Redemption**: Registra la rendición sobre una tarjeta
+### **1. `User` (Usuario)**  
+Registra la información de los usuarios que pueden crear y administrar tarjetas.  
 
-## 6. Pruebas
+```java
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String username;
+    private String password;
+    private String role; // ADMIN o USER
+}
+```
 
-Para ejecutar las pruebas unitarias:
+### **2. `GiftCard` (Tarjeta Regalo)**  
+Representa una tarjeta regalo con su saldo, estado y fechas.  
 
-```shellscript
+```java
+@Entity
+public class GiftCard {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String codeCard;
+    private Double amount;
+    private LocalDateTime creationDateCard;
+    private LocalDateTime expirationDateCard;
+    private String state; // Active, Expired, Used
+}
+```
+
+### **3. `Redemption` (Redención)**  
+Registra el uso de una tarjeta regalo.  
+
+```java
+@Entity
+public class Redemption {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String recipientEmail;
+    private LocalDateTime redemptionDate;
+}
+```
+
+---
+
+## **6. Pruebas**  
+
+Para ejecutar las pruebas unitarias:  
+
+```shell
 mvn test
 ```
 
-Para ejecutar las pruebas de integración:
+Para ejecutar las pruebas de integración:  
 
-```shellscript
+```shell
 mvn verify
 ```
 
-## 7. Consideraciones de seguridad
+---
 
-- La aplicación utiliza Spring Security para proteger los endpoints
-- Las contraseñas se almacenan encriptadas en la base de datos
-- Los tokens JWT tienen una duración limitada 
-- Se implementan validaciones para prevenir ataques comunes (CSRF, XSS, inyección SQL)
+## **7. Consideraciones de seguridad**  
 
+- La aplicación usa **Spring Security** para proteger los endpoints.  
+- Las contraseñas se almacenan **encriptadas** en la base de datos.  
+- Los tokens JWT tienen una **duración limitada** y deben renovarse periódicamente.  
+- Se implementan validaciones para prevenir ataques **CSRF, XSS e inyección SQL**.  
 
-## Licencia
+---
 
-Este proyecto es propiedad de Laura Ximena Limas Sarasty y está protegido por derechos de autor.
+## **Licencia**  
+
+Este proyecto es propiedad de **Laura Ximena Limas Sarasty** y está protegido por derechos de autor.  
+
+---
